@@ -870,3 +870,28 @@ class DemoPasswordResetView(PasswordResetView):
         response = super().form_valid(form)
         self.request.session['demo_reset_link'] = form.demo_link
         return response
+
+def min_settlements(balances):
+    debtors = [[b['user_id'], -b['amount']] for b in balances if b['amount'] < 0]
+    creditors = [[b['user_id'], b['amount']] for b in balances if b['amount'] > 0]
+    names = {b['user_id']: b['name'] for b in balances}
+
+    result = []
+    debtors.sort(key=lambda x: -x[1])
+    creditors.sort(key=lambda x: -x[1])
+    i = j = 0
+    while i < len(debtors) and j < len(creditors):
+        d_id, d_amt = debtors[i]
+        c_id, c_amt = creditors[j]
+        pay = min(d_amt, c_amt)
+        result.append({
+            'from': names.get(d_id, '?'), 'to': names.get(c_id, '?'),
+            'amount': pay, 'from_id': d_id, 'to_id': c_id,
+        })
+        debtors[i][1] -= pay
+        creditors[j][1] -= pay
+        if debtors[i][1] == 0:
+            i += 1
+        if creditors[j][1] == 0:
+            j += 1
+    return result
