@@ -1,0 +1,6 @@
+{% extends "auth_base.html" %}
+{% block auth_content %}
+<h1 class="font-display text-4xl mb-4">Перевір пошту</h1>
+<p class="text-muted">Якщо акаунт з таким email існує, ми надіслали на нього посилання. Перевір також папку «Спам».</p>
+<p class="text-center mt-6"><a href="{% url 'login' %}" class="text-brand-500">Повернутися до входу</a></p>
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="flex justify-between items-center mb-8">
+  <h1 class="font-display text-5xl text-ink">Цілі</h1>
+  {% if has_any %}
+    <form method="post" action="{% url 'goals_clear' %}" data-confirm="Очистити всі цілі? Цю дію не можна скасувати.">
+      {% csrf_token %}
+      <button class="px-4 py-2 rounded-xl bg-danger text-white font-semibold">Очистити все</button>
+    </form>
+  {% endif %}
+</div>
+
+<div class="grid grid-cols-3 gap-6">
+  <div class="col-span-2 grid grid-cols-2 gap-6">
+    {% for g in goals %}
+      <div class="bg-white rounded-2xl p-6 shadow-sm">
+        <div class="flex justify-between items-start">
+          <h3 class="font-display text-2xl">{{ g.title }}</h3>
+          {% if g.is_closed %}
+            <span class="w-6 h-6 rounded-full bg-ok text-white flex items-center justify-center text-sm">✓</span>
+          {% endif %}
+        </div>
+        <p class="text-muted text-sm">до {{ g.deadline|date:"d.m.Y" }}</p>
+
+        <p class="text-3xl text-brand-500 mt-4">{{ g.percent }}%</p>
+        <p class="mt-2">{{ g.saved }} з {{ g.target }} ₴</p>
+        <div class="h-3 rounded-full bg-brand-50 mt-2">
+          <div class="h-3 rounded-full bg-brand-500" style="width: {{ g.percent }}%"></div>
+        </div>
+        <p class="text-muted text-sm mt-2">Залишилось {{ g.left }} ₴</p>
+
+        {% if g.is_closed %}
+          <p class="mt-4 text-ok font-semibold">Ціль закрита</p>
+        {% else %}
+          <form method="post" action="{% url 'goal_deposit' g.pk %}" class="flex gap-2 mt-4">
+            {% csrf_token %}
+            <input type="number" name="amount" min="1" step="0.01" placeholder="Сума"
+                   class="flex-1 border border-brand-200 rounded-xl px-3 py-2">
+            <button class="bg-brand-500 text-white rounded-xl px-4 hover:bg-brand-900">Поповнити</button>
+          </form>
+        {% endif %}
+
+        <form method="post" action="{% url 'goal_delete' g.pk %}" class="mt-4" data-confirm="Видалити ціль?">
+          {% csrf_token %}
+          <button class="bg-danger text-white font-semibold text-sm rounded-xl px-4 py-2 hover:opacity-90">Видалити ціль</button>
+        </form>
+      </div>
+    {% empty %}
+      <p class="text-muted">Цілей ще немає</p>
+    {% endfor %}
+  </div>
+
+  <div class="bg-white rounded-2xl p-6 shadow-sm">
+    <h2 class="font-display text-2xl mb-4">Нова ціль</h2>
+    <form method="post" class="flex flex-col gap-4">
+      {% csrf_token %}
+      {% for field in form %}
+        {% include "includes/field.html" %}
+      {% endfor %}
+      <button class="bg-brand-500 text-white rounded-xl py-3 hover:bg-brand-900">Зберегти</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

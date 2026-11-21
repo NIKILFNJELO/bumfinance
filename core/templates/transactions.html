@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+  <h1 class="font-display text-5xl">Транзакції</h1>
+  <div class="flex gap-2 items-center">
+    <a href="?type=all" class="px-4 py-2 rounded-xl {% if kind == 'all' %}bg-brand-200{% else %}bg-white{% endif %}">Усі</a>
+    <a href="?type=income" class="px-4 py-2 rounded-xl {% if kind == 'income' %}bg-brand-200{% else %}bg-white{% endif %}">Доходи</a>
+    <a href="?type=expense" class="px-4 py-2 rounded-xl {% if kind == 'expense' %}bg-brand-200{% else %}bg-white{% endif %}">Витрати</a>
+    {% if has_any %}
+      <form method="post" action="{% url 'transactions_clear' %}" data-confirm="Очистити всі транзакції? Цю дію не можна скасувати.">
+        {% csrf_token %}
+        <button class="px-4 py-2 rounded-xl bg-danger text-white font-semibold">Очистити все</button>
+      </form>
+    {% endif %}
+  </div>
+</div>
+
+<div class="grid grid-cols-3 gap-6">
+  <div class="col-span-2 bg-white rounded-2xl p-6 shadow-sm">
+    <div class="grid grid-cols-4 py-3 border-b-2 border-brand-200 text-muted text-sm">
+      <span>Категорія</span>
+      <span>Дата</span>
+      <span>Коментар</span>
+      <span class="text-right">Сума</span>
+    </div>
+    {% for t in items %}
+      <div class="grid grid-cols-4 py-3 border-b border-brand-50">
+        <span>{{ t.get_category_display }}</span>
+        <span class="text-muted">{{ t.date|date:"Y-m-d" }}</span>
+        <span class="text-muted">{{ t.comment }}</span>
+        <span class="text-right {% if t.type == 'expense' %}text-danger{% else %}text-ok{% endif %}">
+          {% if t.type == 'expense' %}−{% else %}+{% endif %}{{ t.amount }} ₴
+        </span>
+      </div>
+    {% empty %}
+      <p class="text-muted">Транзакцій немає</p>
+    {% endfor %}
+  </div>
+
+  <div class="bg-white rounded-2xl p-6 shadow-sm">
+    <h2 class="font-display text-2xl mb-4">Нова транзакція</h2>
+    <form method="post" class="flex flex-col gap-4">
+      {% csrf_token %}
+      {% for field in form %}
+        {% include "includes/field.html" %}
+      {% endfor %}
+      <button class="bg-brand-500 text-white rounded-xl py-3 hover:bg-brand-900">Зберегти</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

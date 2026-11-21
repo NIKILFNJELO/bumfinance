@@ -1,0 +1,11 @@
+<div class="flex flex-col">
+  {% if field.label %}<label class="text-muted text-sm" for="{{ field.id_for_label }}">{{ field.label }}</label>{% endif %}
+  {% if field.errors %}
+    {% with cls="w-full mt-1 border-2 border-danger rounded-xl px-4 py-3 focus:outline-none" %}
+      {{ field.as_widget }}
+    {% endwith %}
+    <p class="text-danger text-sm mt-1">{{ field.errors|join:' ' }}</p>
+  {% else %}
+    {{ field }}
+  {% endif %}
+</div>

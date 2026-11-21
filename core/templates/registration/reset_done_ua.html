@@ -1,0 +1,6 @@
+{% extends "auth_base.html" %}
+{% block auth_content %}
+<h1 class="font-display text-4xl mb-4">Пароль змінено</h1>
+<p class="text-muted">Тепер можна увійти з новим паролем.</p>
+<p class="text-center mt-6"><a href="{% url 'login' %}" class="text-brand-500">Увійти</a></p>
+{% endblock %}

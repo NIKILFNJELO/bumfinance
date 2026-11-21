@@ -1,0 +1,20 @@
+{% extends "auth_base.html" %}
+{% block auth_content %}
+<h1 class="font-display text-4xl mb-8">Реєстрація</h1>
+
+<form method="post" class="flex flex-col gap-5">
+  {% csrf_token %}
+  {% for field in form %}
+    <div>
+      <label class="text-muted text-sm">{{ field.label }}</label>
+      {{ field }}
+      {% for e in field.errors %}<p class="text-danger text-sm mt-1">{{ e }}</p>{% endfor %}
+    </div>
+  {% endfor %}
+  <button class="bg-brand-500 text-white rounded-xl py-3 hover:bg-brand-900">Зареєструватися</button>
+</form>
+
+<p class="text-center mt-6 text-muted">
+  Вже є акаунт? <a href="{% url 'login' %}" class="text-brand-500">Увійти</a>
+</p>
+{% endblock %}

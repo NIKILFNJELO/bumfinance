@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="font-display text-5xl text-ink mb-8">Експорт</h1>
+
+<div class="grid grid-cols-3 gap-6">
+  <form method="post" action="{% url 'export' %}" class="col-span-2 bg-white rounded-2xl p-6 shadow-sm flex flex-col gap-6">
+    {% csrf_token %}
+
+    <div>
+      <p class="font-display text-2xl mb-3">Формат</p>
+      <div class="grid grid-cols-3 gap-3">
+        <label class="fmt-option text-center py-3 rounded-xl border border-brand-200 cursor-pointer select-none">
+          <input type="checkbox" name="format" value="csv" checked class="sr-only">CSV
+        </label>
+        <label class="fmt-option text-center py-3 rounded-xl border border-brand-200 cursor-pointer select-none">
+          <input type="checkbox" name="format" value="excel" class="sr-only">Excel
+        </label>
+        <label class="fmt-option text-center py-3 rounded-xl border border-brand-200 cursor-pointer select-none">
+          <input type="checkbox" name="format" value="pdf" class="sr-only">PDF
+        </label>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <p class="font-display text-2xl mb-3">Період</p>
+        <select name="period" class="w-full border border-brand-200 rounded-xl px-4 py-2">
+          <option value="month">Поточний місяць</option>
+          <option value="all">Увесь час</option>
+        </select>
+      </div>
+      <div>
+        <p class="font-display text-2xl mb-3">Дата звіту</p>
+        <input type="date" name="report_date" value="{% now 'Y-m-d' %}"
+               class="w-full border border-brand-200 rounded-xl px-4 py-2 focus:outline-none focus:border-brand-500">
+      </div>
+    </div>
+
+    <div>
+      <p class="font-display text-2xl mb-3">Що експортувати</p>
+      <div class="grid grid-cols-3 gap-3">
+        <label class="fmt-option text-center py-3 rounded-xl border border-brand-200 cursor-pointer select-none">
+          <input type="checkbox" name="what" value="tx" checked class="sr-only">Транзакції
+        </label>
+        <label class="fmt-option text-center py-3 rounded-xl border border-brand-200 cursor-pointer select-none">
+          <input type="checkbox" name="what" value="shared" checked class="sr-only">Спільні чеки
+        </label>
+        <label class="fmt-option text-center py-3 rounded-xl border border-brand-200 cursor-pointer select-none">
+          <input type="checkbox" name="what" value="limits" class="sr-only">Ліміти і цілі
+        </label>
+      </div>
+    </div>
+
+    <div class="flex gap-3">
+      <button class="bg-brand-500 text-white rounded-xl px-6 py-2 hover:bg-brand-900">Експортувати</button>
+      <a href="{% url 'export' %}" class="bg-white border border-brand-200 rounded-xl px-6 py-2">Скасувати</a>
+    </div>
+  </form>
+
+  <div class="bg-white rounded-2xl p-6 shadow-sm flex flex-col gap-4">
+    <p class="font-display text-3xl">Інформація про акаунт</p>
+    <p class="text-lg">Ім'я: <span class="font-semibold">{{ request.user.first_name|default:request.user.username }}</span></p>
+    <p class="text-lg">Логін: <span class="font-semibold">{{ request.user.username }}</span></p>
+    <p class="text-lg">Транзакцій: <span class="font-semibold">{{ tx_count }}</span></p>
+    <p class="text-lg">Груп: <span class="font-semibold">{{ group_count }}</span></p>
+    <p class="text-lg">Друзів: <span class="font-semibold">{{ friend_count }}</span></p>
+    <p class="text-muted text-sm mt-2">Якщо обрано кілька форматів, файли прийдуть одним архівом ZIP.</p>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('.fmt-option').forEach(label => {
+    const cb = label.querySelector('input');
+    const paint = () => {
+      label.classList.toggle('bg-brand-500', cb.checked);
+      label.classList.toggle('text-white', cb.checked);
+    };
+    paint();
+    label.addEventListener('click', e => {
+      e.preventDefault();
+      cb.checked = !cb.checked;
+      paint();
+    });
+  });
+</script>
+{% endblock %}

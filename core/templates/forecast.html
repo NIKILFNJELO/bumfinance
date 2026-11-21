@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="font-display text-5xl text-ink mb-8">Прогноз</h1>
+
+<div class="grid grid-cols-3 gap-6 mb-8">
+  <div class="bg-white rounded-2xl p-6 shadow-sm">
+    <p class="text-muted">Очікувані витрати</p>
+    <p class="text-3xl mt-2 text-danger">{{ expected_expense }} ₴</p>
+  </div>
+  <div class="bg-white rounded-2xl p-6 shadow-sm">
+    <p class="text-muted">Очікувані доходи</p>
+    <p class="text-3xl mt-2 text-ok">{{ expected_income }} ₴</p>
+  </div>
+  <div class="bg-white rounded-2xl p-6 shadow-sm">
+    <p class="text-muted">Очікуваний залишок</p>
+    <p class="text-3xl mt-2">{{ expected_left }} ₴</p>
+  </div>
+</div>
+
+<div class="bg-white rounded-2xl p-6 shadow-sm mb-8">
+  <h2 class="font-display text-2xl mb-3">Рекомендації</h2>
+  <ul class="flex flex-col gap-2">
+    {% for tip in tips %}
+      <li class="flex gap-2"><span class="text-brand-500">●</span><span>{{ tip }}</span></li>
+    {% endfor %}
+  </ul>
+</div>
+
+<div class="bg-white rounded-2xl p-6 shadow-sm">
+  <h2 class="font-display text-2xl mb-4">Витрати за місяць: факт і прогноз</h2>
+  <svg viewBox="0 0 {{ W }} {{ H }}" class="w-full h-auto">
+    {% if limit_y %}
+      <line x1="40" y1="{{ limit_y }}" x2="{{ W|add:-40 }}" y2="{{ limit_y }}" stroke="#D64545" stroke-width="3" stroke-dasharray="10 8"/>
+      <text x="50" y="{{ limit_y|add:-10 }}" fill="#D64545" font-size="26">Ліміт {{ limit.amount }} ₴</text>
+    {% endif %}
+    <polyline points="{{ actual_pts }}" fill="none" stroke="#4A90D9" stroke-width="5" stroke-linejoin="round"/>
+    <polyline points="{{ forecast_pts }}" fill="none" stroke="#4A90D9" stroke-width="5" stroke-dasharray="16 12"/>
+    {% for d, x in x_labels %}
+      <text x="{{ x }}" y="{{ H|add:-2 }}" text-anchor="middle" fill="#5B6B80" font-size="24">{{ d }}</text>
+    {% endfor %}
+  </svg>
+  <div class="flex gap-6 text-sm text-muted mt-2">
+    <span><span class="inline-block w-6 border-t-4 border-brand-500 align-middle"></span> Факт</span>
+    <span><span class="inline-block w-6 border-t-4 border-dashed border-brand-500 align-middle"></span> Прогноз</span>
+    <span><span class="inline-block w-6 border-t-4 border-dashed border-danger align-middle"></span> Ліміт</span>
+  </div>
+</div>
+{% endblock %}

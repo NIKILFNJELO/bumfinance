@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="flex justify-between items-center mb-8">
+  <h1 class="font-display text-5xl text-ink">Ліміти</h1>
+  {% if has_any %}
+    <form method="post" action="{% url 'limits_clear' %}" data-confirm="Очистити всі ліміти? Цю дію не можна скасувати.">
+      {% csrf_token %}
+      <button class="px-4 py-2 rounded-xl bg-danger text-white font-semibold">Очистити все</button>
+    </form>
+  {% endif %}
+</div>
+
+<div class="grid grid-cols-3 gap-6">
+  <div class="col-span-2 flex flex-col gap-4">
+    {% for r in rows %}
+      <div class="bg-white rounded-2xl p-6 shadow-sm">
+        <div class="flex justify-between mb-2">
+          <span>{% if r.lim.category %}{{ r.lim.get_category_display }}{% else %}Загальний ліміт на місяць{% endif %}</span>
+          <span class="text-muted">{{ r.spent }} з {{ r.lim.amount }} ₴ · {{ r.real_pct }}%</span>
+        </div>
+        <div class="h-3 rounded-full bg-brand-50">
+          <div class="h-3 rounded-full {% if r.real_pct > 100 %}bg-danger{% elif r.real_pct >= 80 %}bg-warn{% else %}bg-ok{% endif %}" style="width: {{ r.pct }}%"></div>
+        </div>
+        {% if r.real_pct > 100 %}
+          <p class="text-danger text-sm mt-2">Ліміт перевищено</p>
+        {% elif r.real_pct >= 80 %}
+          <p class="text-warn text-sm mt-2">Наближення до ліміту</p>
+        {% endif %}
+      </div>
+    {% empty %}
+      <p class="text-muted">Лімітів на цей місяць ще немає</p>
+    {% endfor %}
+  </div>
+
+  <div class="bg-white rounded-2xl p-6 shadow-sm">
+    <h2 class="font-display text-2xl mb-4">Новий ліміт</h2>
+    <form method="post" class="flex flex-col gap-4">
+      {% csrf_token %}
+      {% for field in form %}
+        {% include "includes/field.html" %}
+      {% endfor %}
+      <button class="bg-brand-500 text-white rounded-xl py-3 hover:bg-brand-900">Зберегти</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

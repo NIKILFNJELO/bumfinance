@@ -1,0 +1,68 @@
+{% load static %}
+<aside class="w-60 bg-brand-900 text-white flex flex-col p-4 min-h-screen">
+  <div class="flex items-center gap-2 px-2 mb-8">
+    <img src="{% static 'main/images/logo.png' %}" alt="BumFinance" class="w-11 h-11 rounded-xl">
+    <span class="font-display text-2xl">BumFinance</span>
+  </div>
+
+  {% url 'dashboard' as dash %}
+  {% url 'transactions' as tx %}
+  {% url 'shared' as sh %}
+  {% url 'limits' as lim %}
+  {% url 'goals' as gl %}
+  {% url 'notifications' as nt %}
+  {% url 'forecast' as fc %}
+  {% url 'export' as ex %}
+  {% url 'friends' as fr %}
+  {% url 'settings' as st %}
+
+  <nav class="flex flex-col gap-1">
+    <a href="{{ dash }}" class="px-4 py-3 rounded-xl {% if request.path == dash %}bg-brand-50 text-brand-900{% else %}text-brand-200 hover:bg-brand-500{% endif %}">Дашборд</a>
+    <a href="{{ tx }}" class="px-4 py-3 rounded-xl {% if request.path == tx %}bg-brand-50 text-brand-900{% else %}text-brand-200 hover:bg-brand-500{% endif %}">Транзакції</a>
+
+    <a href="{{ sh }}" class="relative px-4 py-3 rounded-xl flex items-center justify-between {% if request.path == sh %}bg-brand-50 text-brand-900{% else %}text-brand-200 hover:bg-brand-500{% endif %}">
+      Спільний чек
+      {% if group_messages_count %}
+        <span class="bg-danger text-white text-xs font-semibold rounded-full min-w-[22px] h-[22px] px-1 flex items-center justify-center">{{ group_messages_count }}</span>
+      {% endif %}
+    </a>
+
+    <a href="{{ lim }}" class="px-4 py-3 rounded-xl {% if request.path == lim %}bg-brand-50 text-brand-900{% else %}text-brand-200 hover:bg-brand-500{% endif %}">Ліміти</a>
+    <a href="{{ gl }}" class="px-4 py-3 rounded-xl {% if request.path == gl %}bg-brand-50 text-brand-900{% else %}text-brand-200 hover:bg-brand-500{% endif %}">Цілі</a>
+
+    <a href="{{ nt }}" class="relative px-4 py-3 rounded-xl flex items-center justify-between {% if request.path == nt %}bg-brand-50 text-brand-900{% else %}text-brand-200 hover:bg-brand-500{% endif %}">
+      Сповіщення
+      {% if notifications_count %}
+        <span class="bg-danger text-white text-xs font-semibold rounded-full min-w-[22px] h-[22px] px-1 flex items-center justify-center">{{ notifications_count }}</span>
+      {% endif %}
+    </a>
+
+    <a href="{{ fc }}" class="px-4 py-3 rounded-xl {% if request.path == fc %}bg-brand-50 text-brand-900{% else %}text-brand-200 hover:bg-brand-500{% endif %}">Прогноз</a>
+    <a href="{{ ex }}" class="px-4 py-3 rounded-xl {% if request.path == ex %}bg-brand-50 text-brand-900{% else %}text-brand-200 hover:bg-brand-500{% endif %}">Експорт</a>
+
+    <a href="{{ fr }}" class="relative px-4 py-3 rounded-xl flex items-center justify-between {% if request.path == fr %}bg-brand-50 text-brand-900{% else %}text-brand-200 hover:bg-brand-500{% endif %}">
+      Друзі
+      {% if friend_requests_count %}
+        <span class="bg-danger text-white text-xs font-semibold rounded-full min-w-[22px] h-[22px] px-1 flex items-center justify-center">{{ friend_requests_count }}</span>
+      {% endif %}
+    </a>
+  </nav>
+
+  <div class="mt-auto pt-4 border-t border-brand-500">
+    {% if user.is_authenticated %}
+  <a href="{{ st }}" class="flex items-center gap-2 px-2 mb-3 py-1 rounded-xl {% if request.path == st %}bg-brand-200 text-brand-900{% else %}hover:bg-brand-500 text-white{% endif %}">
+    <div class="w-9 h-9 rounded-full bg-brand-500 text-white flex items-center justify-center font-display shrink-0">
+      {{ user.first_name|default:user.username|first|upper }}
+    </div>
+    <span class="truncate">{{ user.first_name|default:user.username }}</span>
+  </a>
+  <form method="post" action="{% url 'logout' %}">
+    {% csrf_token %}
+    <button class="w-full text-left px-4 py-2 rounded-xl text-brand-200 hover:bg-brand-500">Вийти</button>
+  </form>
+{% else %}
+      <a href="{% url 'login' %}" class="block px-4 py-2 rounded-xl text-brand-200 hover:bg-brand-500">Вхід</a>
+      <a href="{% url 'signup' %}" class="block px-4 py-2 rounded-xl text-brand-200 hover:bg-brand-500">Реєстрація</a>
+    {% endif %}
+  </div>
+</aside>

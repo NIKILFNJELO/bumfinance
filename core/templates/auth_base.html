@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BumFinance</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poiret+One&family=Kurale&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: { extend: {
+        colors: {
+          brand: { 900: '#2F5D8C', 500: '#4A90D9', 200: '#CFE3F8', 50: '#EAF2FB' },
+          ink: '#1F2A3C', muted: '#5B6B80',
+          ok: '#2E9E6B', warn: '#EF9F27', danger: '#D64545'
+        },
+        fontFamily: { display: ['Poiret One', 'sans-serif'], sans: ['Kurale', 'sans-serif'] }
+      }}
+    }
+  </script>
+</head>
+<body class="bg-brand-50 font-sans text-ink">
+  <div class="min-h-screen grid grid-cols-2">
+    <div class="bg-brand-900 text-white flex flex-col justify-center p-16">
+      <div class="flex items-center gap-3 mb-10">
+        <div class="w-16 h-16 rounded-2xl bg-brand-500 flex items-center justify-center font-display text-4xl">B</div>
+        <span class="font-display text-5xl">BUMFINANCE</span>
+      </div>
+      <p class="font-display text-3xl text-brand-200">Особисті фінанси та спільні</p>
+      <p class="font-display text-3xl text-brand-200">витрати в одному місці</p>
+    </div>
+
+    <div class="flex items-center justify-center p-10">
+      <div class="w-full max-w-md bg-white rounded-2xl p-10 shadow-sm">
+        {% block auth_content %}{% endblock %}
+      </div>
+    </div>
+  </div>
+</body>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('form').forEach(f => f.setAttribute('novalidate', ''));
+  });
+</script>
+</html>

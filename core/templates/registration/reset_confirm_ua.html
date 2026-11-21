@@ -1,0 +1,16 @@
+{% extends "auth_base.html" %}
+{% block auth_content %}
+<h1 class="font-display text-4xl mb-6">Новий пароль</h1>
+{% if validlink %}
+  <form method="post" class="flex flex-col gap-5">
+    {% csrf_token %}
+    {% for field in form %}
+      {% include "includes/password_field.html" %}
+    {% endfor %}
+    <button class="bg-brand-500 text-white rounded-xl py-3 hover:bg-brand-900">Зберегти пароль</button>
+  </form>
+{% else %}
+  <p class="text-danger">Посилання недійсне або вже використане.</p>
+  <p class="mt-4"><a href="{% url 'password_reset' %}" class="text-brand-500">Запросити нове посилання</a></p>
+{% endif %}
+{% endblock %}

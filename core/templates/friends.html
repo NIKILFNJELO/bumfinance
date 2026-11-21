@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="font-display text-5xl text-ink mb-8">Друзі</h1>
+
+{% if messages %}
+  {% for message in messages %}
+    <div class="mb-4 p-3 rounded-xl {% if message.tags == 'error' %}bg-danger{% else %}bg-ok{% endif %} text-white font-semibold">{{ message }}</div>
+  {% endfor %}
+{% endif %}
+
+<div class="grid grid-cols-2 gap-6">
+  <div class="bg-white rounded-2xl p-6 shadow-sm">
+    <form method="get" class="flex gap-2 mb-4">
+      <input name="q" value="{{ q }}" placeholder="Логін користувача"
+             class="flex-1 border border-brand-200 rounded-xl px-4 py-2">
+      <button class="bg-ok text-white font-semibold rounded-xl px-5 hover:opacity-90">Знайти</button>
+    </form>
+    {% for u in found %}
+      <div class="flex justify-between items-center py-3 border-b border-brand-50">
+        <span>{{ u.first_name }} {{ u.last_name }} <span class="text-muted">@{{ u.username }}</span></span>
+        {% if u.pk in sent_ids %}
+          <span class="text-ok font-semibold">Запит надіслано</span>
+        {% else %}
+          <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="user_id" value="{{ u.pk }}">
+            <button name="action" value="request" class="bg-ok text-white font-semibold rounded-xl px-4 py-2 hover:opacity-90">Додати</button>
+          </form>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+
+  <div class="bg-white rounded-2xl p-6 shadow-sm">
+    <h2 class="font-display text-2xl mb-3">Запити</h2>
+    {% for r in incoming %}
+      <div class="flex justify-between items-center py-2">
+        <span>{{ r.sender.first_name }} {{ r.sender.last_name }} (@{{ r.sender.username }})</span>
+        <form method="post" class="flex gap-2">
+          {% csrf_token %}
+          <input type="hidden" name="user_id" value="{{ r.sender.pk }}">
+          <button name="action" value="accept" class="bg-ok text-white font-semibold rounded-xl px-3 py-1 hover:opacity-90">Прийняти</button>
+          <button name="action" value="reject" class="bg-danger text-white font-semibold rounded-xl px-3 py-1 hover:opacity-90">Відхилити</button>
+        </form>
+      </div>
+    {% empty %}
+      <p class="text-muted">Нових запитів немає</p>
+    {% endfor %}
+
+    <h2 class="font-display text-2xl mt-6 mb-3">Мої друзі</h2>
+    {% for f in friends %}
+      <p class="py-1">{{ f.first_name }} {{ f.last_name }} <span class="text-muted">@{{ f.username }}</span></p>
+    {% empty %}
+      <p class="text-muted">Друзів ще немає</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

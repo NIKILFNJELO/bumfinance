@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="font-display text-5xl text-ink mb-6">Спільний чек</h1>
+
+{% if messages %}
+  {% for message in messages %}
+    <div data-flash class="mb-4 p-3 rounded-xl {% if message.tags == 'error' %}bg-danger{% else %}bg-ok{% endif %} text-white font-semibold">{{ message }}</div>
+  {% endfor %}
+{% endif %}
+
+<div class="grid grid-cols-12 gap-6 h-[700px]">
+
+  <div class="col-span-3 bg-white rounded-2xl p-4 shadow-sm flex flex-col min-h-0">
+    <form method="post" action="{% url 'group_create' %}" class="shrink-0 pb-4 flex flex-col gap-3">
+      {% csrf_token %}
+      {{ group_form.name }}
+      <select name="member_ids" class="w-full border border-brand-200 rounded-xl px-3 py-2">
+        <option value="">Додати друга</option>
+        {% for f in friends %}
+          <option value="{{ f.pk }}">{{ f.first_name|default:f.username }} {{ f.last_name }}</option>
+        {% endfor %}
+      </select>
+      <button class="bg-brand-500 text-white rounded-xl py-2 hover:bg-brand-900">+ Нова група</button>
+    </form>
+    <div class="flex-1 min-h-0 overflow-y-auto flex flex-col gap-2 border-t border-brand-200 pt-3 chat-scroll">
+      {% for g in groups %}
+        <a href="?group={{ g.pk }}"
+           class="relative shrink-0 p-3 rounded-xl {% if active and g.pk == active.pk %}bg-brand-200{% else %}hover:bg-brand-50{% endif %}">
+          <p class="font-semibold">{{ g.name }}</p>
+          <p class="text-muted text-sm">{{ g.memberships.count }} учасників</p>
+          {% if g.unread %}
+            <span class="absolute top-3 right-3 bg-danger text-white text-xs font-semibold rounded-full min-w-[22px] h-[22px] px-1 flex items-center justify-center">{{ g.unread }}</span>
+          {% endif %}
+        </a>
+      {% empty %}
+        <p class="text-muted p-3">Груп ще немає</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% if active %}
+  <div class="col-span-6 bg-white rounded-2xl shadow-sm flex flex-col min-h-0">
+    <div class="shrink-0 p-4 border-b border-brand-200">
+      <div class="flex justify-between items-start">
+        <p class="font-display text-2xl">{{ active.name }}</p>
+        <div class="flex gap-2">
+          {% if active.owner == request.user %}
+            <form method="post" action="{% url 'group_delete' active.pk %}" data-confirm="Видалити групу разом з усіма витратами?">
+              {% csrf_token %}
+              <button class="bg-danger text-white font-semibold text-sm rounded-xl px-4 py-2 hover:opacity-90">Видалити групу</button>
+            </form>
+          {% else %}
+            {% if my_debt > 0 %}
+              <form method="post" action="{% url 'group_leave' active.pk %}" data-confirm="У тебе борг {{ my_debt }} ₴. Покинути групу «{{ active.name }}» все одно?">
+                {% csrf_token %}
+                <button class="bg-danger text-white font-semibold text-sm rounded-xl px-4 py-2 hover:opacity-90">Покинути групу</button>
+              </form>
+            {% else %}
+              <form method="post" action="{% url 'group_leave' active.pk %}" data-confirm="Покинути групу «{{ active.name }}»?">
+                {% csrf_token %}
+                <button class="bg-danger text-white font-semibold text-sm rounded-xl px-4 py-2 hover:opacity-90">Покинути групу</button>
+              </form>
+            {% endif %}
+          {% endif %}
+        </div>
+      </div>
+      <div class="flex flex-wrap gap-2 mt-2 items-center">
+        {% for m in members %}
+          <span class="text-sm text-muted inline-flex items-center gap-1">
+            {{ m.first_name|default:m.username }}{% if m == active.owner %} (адмін){% endif %}
+            {% if active.owner == request.user and m != request.user %}
+              <form method="post" action="{% url 'group_remove_member' active.pk m.pk %}" class="inline" data-confirm="Видалити учасника з групи?">
+                {% csrf_token %}
+                <button class="text-danger text-xs hover:underline" title="Видалити учасника">×</button>
+              </form>
+            {% endif %}
+          </span>
+        {% endfor %}
+      </div>
+      {% if active.owner == request.user and candidates %}
+        <form method="post" action="{% url 'group_add_member' active.pk %}" class="flex gap-2 mt-3">
+          {% csrf_token %}
+          <select name="user_id" class="flex-1 border border-brand-200 rounded-xl px-3 py-2 text-sm">
+            {% for f in candidates %}
+              <option value="{{ f.pk }}">{{ f.first_name|default:f.username }}</option>
+            {% endfor %}
+          </select>
+          <button class="bg-ok text-white font-semibold rounded-xl px-4 hover:opacity-90">Додати учасника</button>
+        </form>
+      {% endif %}
+    </div>
+
+    <div class="flex-1 min-h-0 overflow-y-auto p-4 flex flex-col gap-3 chat-scroll">
+      {% for item in feed %}
+        {% if item.kind == 'message' %}
+          {% with m=item.obj %}
+          <div class="shrink-0 self-start bg-brand-50 rounded-2xl px-4 py-2 max-w-md">
+            <p class="text-muted text-xs">{{ m.author.first_name|default:m.author.username }} · {{ m.created_at|date:"d.m H:i" }}</p>
+            <p>{{ m.text }}</p>
+          </div>
+          {% endwith %}
+        {% else %}
+          {% with e=item.obj %}
+          <div class="shrink-0 w-72 bg-white border-2 border-brand-500 rounded-2xl overflow-hidden self-start">
+            <div class="bg-brand-50 text-brand-900 px-4 py-2 font-semibold">Витрата · {{ e.comment }}</div>
+            <div class="p-4">
+              <p class="text-muted text-sm">{{ e.payer.first_name|default:e.payer.username }} заплатив</p>
+              <p class="text-2xl">{{ e.amount }} ₴</p>
+              <p class="text-muted text-sm">{{ e.date|date:"d.m.Y" }} · ділиться на {{ e.shares.count }}</p>
+              <div class="mt-2 text-sm">
+                {% for s in e.shares.all %}
+                  {% if s.user != e.payer %}
+                    {% if s.is_paid %}
+                      <p class="text-ok font-semibold">✓ {{ s.user.first_name|default:s.user.username }} сплатив {{ s.amount }} ₴</p>
+                    {% else %}
+                      <p class="text-danger">{{ s.user.first_name|default:s.user.username }} винен {{ s.amount }} ₴</p>
+                    {% endif %}
+                  {% endif %}
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+          {% endwith %}
+        {% endif %}
+      {% empty %}
+        <p class="text-muted text-center">Ще немає повідомлень і витрат</p>
+      {% endfor %}
+    </div>
+
+    <form method="post" action="{% url 'message_create' active.pk %}" class="shrink-0 p-4 border-t border-brand-200 flex gap-2">
+      {% csrf_token %}
+      <input name="text" maxlength="200" placeholder="Написати повідомлення (до 200 символів)"
+             class="flex-1 border border-brand-200 rounded-xl px-3 py-2">
+      <button class="bg-brand-500 text-white rounded-xl px-4 hover:bg-brand-900">Надіслати</button>
+    </form>
+
+    <form method="post" action="{% url 'expense_create' active.pk %}" class="shrink-0 p-4 border-t border-brand-200 flex flex-col gap-3">
+      {% csrf_token %}
+      <div class="grid grid-cols-2 gap-3">
+        {{ expense_form.amount }}
+        {{ expense_form.date }}
+      </div>
+      {{ expense_form.comment }}
+      <button class="bg-brand-500 text-white rounded-xl py-2 hover:bg-brand-900 disabled:opacity-40"
+              {% if user_balance <= 0 %}disabled{% endif %}>+ Витрата</button>
+    </form>
+  </div>
+
+  <div class="col-span-3 bg-white rounded-2xl p-4 shadow-sm flex flex-col min-h-0">
+    <h2 class="font-display text-2xl mb-3 shrink-0">Баланси</h2>
+    <div class="flex-1 min-h-0 overflow-y-auto chat-scroll">
+      {% for b in balances %}
+        <div class="flex justify-between py-1">
+          <span>{{ b.name }}</span>
+          <span class="{% if b.amount >= 0 %}text-ok{% else %}text-danger{% endif %}">
+            {% if b.amount >= 0 %}+{% endif %}{{ b.amount|floatformat:2 }} ₴
+          </span>
+        </div>
+      {% endfor %}
+
+      <h2 class="font-display text-2xl mt-6 mb-3">Що переказати</h2>
+      {% for s in settlements %}
+        <div class="bg-brand-50 rounded-xl p-3 mb-2">
+          <p>{{ s.from }} → {{ s.to }}</p>
+          <p class="font-semibold">{{ s.amount }} ₴</p>
+          {% if s.from_id == request.user.pk %}
+            <form method="post" action="{% url 'settlement_done' active.pk %}" class="mt-2">
+              {% csrf_token %}
+              <input type="hidden" name="to_id" value="{{ s.to_id }}">
+              <input type="hidden" name="amount" value="{{ s.amount }}">
+              <button class="w-full bg-brand-500 text-white rounded-xl py-2 hover:bg-brand-900">Сплачено</button>
+            </form>
+          {% endif %}
+        </div>
+      {% empty %}
+        <p class="text-muted">Усі розрахувались</p>
+      {% endfor %}
+    </div>
+  </div>
+  {% else %}
+  <div class="col-span-9 bg-white rounded-2xl shadow-sm flex items-center justify-center min-h-0">
+    <p class="text-muted text-lg">
+      {% if groups %}Обери групу зліва, щоб побачити чат{% else %}Створи першу групу зліва{% endif %}
+    </p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

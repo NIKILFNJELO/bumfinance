@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="uk" class="{% if request.user.is_authenticated and request.user.profile.theme == 'dark' %}dark{% endif %}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BumFinance</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poiret+One&family=Kurale&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: { extend: {
+        colors: {
+          brand: { 900: '#2F5D8C', 500: '#4A90D9', 200: '#CFE3F8', 50: '#EAF2FB' },
+          ink: '#1F2A3C', muted: '#5B6B80',
+          ok: '#2E9E6B', warn: '#EF9F27', danger: '#D64545'
+        },
+        fontFamily: { display: ['Poiret One', 'sans-serif'], sans: ['Kurale', 'sans-serif'] }
+      }}
+    }
+  </script>
+  <style>
+    
+    .chat-scroll { scrollbar-width: none; -ms-overflow-style: none; }
+    .chat-scroll::-webkit-scrollbar { display: none; }
+
+    .dark body { background-color: #14202F; color: #EAF2FB; }
+    .dark .bg-white { background-color: #1D2B3F !important; }
+    .dark .bg-brand-50 { background-color: #14202F !important; }
+    .dark .bg-brand-200 { background-color: #2A4A6E !important; }
+    .dark .text-ink, .dark h1, .dark h2, .dark h3 { color: #EAF2FB !important; }
+    .dark .text-muted { color: #9FB3C8 !important; }
+    .dark .text-brand-900 { color: #EAF2FB !important; }
+    .dark .text-brand-200 { color: #CFE3F8 !important; }
+    .dark input, .dark select, .dark textarea {
+      background-color: #14202F !important;
+      color: #EAF2FB !important;
+      border-color: #3C5878 !important;
+    }
+    .dark input::placeholder, .dark textarea::placeholder { color: #6F8299 !important; }
+    .dark input[disabled] { background-color: #1D2B3F !important; color: #9FB3C8 !important; }
+    .dark select option { background-color: #1D2B3F; color: #EAF2FB; }
+    .dark .border-brand-200, .dark .border-brand-50 { border-color: #2A3A50 !important; }
+    .dark .hover\:bg-brand-50:hover { background-color: #1D2B3F !important; }
+
+    /* статусні кольори зберігаються в темній темі */
+    .dark .text-danger { color: #D64545 !important; }
+    .dark .text-ok { color: #2E9E6B !important; }
+    .dark .text-warn { color: #EF9F27 !important; }
+    .dark .bg-danger { background-color: #D64545 !important; }
+    .dark .bg-ok { background-color: #2E9E6B !important; }
+    .dark .bg-warn { background-color: #EF9F27 !important; }
+  </style>
+</head>
+<body class="bg-brand-50 font-sans text-ink">
+  <div class="flex min-h-screen">
+    {% include "_sidebar.html" %}
+    <main class="flex-1 p-8">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+
+  <div id="confirm-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-2xl p-6 shadow-lg w-96">
+      <p id="confirm-text" class="text-lg mb-6 text-ink"></p>
+      <div class="flex gap-3 justify-end">
+        <button type="button" id="confirm-no" class="px-4 py-2 rounded-xl bg-brand-50 text-brand-900">Скасувати</button>
+        <button type="button" id="confirm-yes" class="px-4 py-2 rounded-xl bg-danger text-white font-semibold">Так, видалити</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const modal = document.getElementById('confirm-modal');
+      const text = document.getElementById('confirm-text');
+      const yes = document.getElementById('confirm-yes');
+      const no = document.getElementById('confirm-no');
+      let pendingForm = null;
+
+      document.querySelectorAll('form[data-confirm]').forEach(form => {
+        form.addEventListener('submit', e => {
+          e.preventDefault();
+          pendingForm = form;
+          text.textContent = form.dataset.confirm;
+          modal.classList.remove('hidden');
+          modal.classList.add('flex');
+        });
+      });
+
+      yes.addEventListener('click', () => pendingForm && pendingForm.submit());
+      no.addEventListener('click', () => {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        pendingForm = null;
+      });
+
+      document.querySelectorAll('form').forEach(f => f.setAttribute('novalidate', ''));
+      setTimeout(() => {
+        document.querySelectorAll('[data-flash]').forEach(el => el.remove());
+      }, 3000);
+    });
+
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('[data-eye]');
+    if (!btn) return;
+    const wrap = btn.closest('.relative');
+    const input = wrap && wrap.querySelector('input');
+    if (!input) return;
+    input.type = input.type === 'password' ? 'text' : 'password';
+  });
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+{% extends "auth_base.html" %}
+{% block auth_content %}
+<h1 class="font-display text-4xl mb-8">Вхід</h1>
+
+<form method="post" class="flex flex-col gap-5">
+  {% csrf_token %}
+
+  {% for field in form %}
+    {% include "includes/field.html" %}
+  {% endfor %}
+
+  {% for e in form.non_field_errors %}
+    <p class="text-danger text-sm">{{ e }}</p>
+  {% endfor %}
+
+  <p class="text-right -mt-2">
+    <a href="{% url 'password_reset' %}" class="text-brand-500 text-sm">Забули пароль?</a>
+  </p>
+
+  <button class="bg-brand-500 text-white rounded-xl py-3 hover:bg-brand-900">Увійти</button>
+</form>
+
+<p class="text-center mt-6 text-muted">
+  Немає акаунта? <a href="{% url 'signup' %}" class="text-brand-500">Зареєструватися</a>
+</p>
+{% endblock %}

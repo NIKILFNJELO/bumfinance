@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="font-display text-5xl text-ink mb-8">Налаштування</h1>
+
+{% if messages %}
+  {% for message in messages %}
+    <div data-flash class="mb-4 p-3 rounded-xl {% if message.tags == 'error' %}bg-danger{% else %}bg-ok{% endif %} text-white font-semibold">{{ message }}</div>
+  {% endfor %}
+{% endif %}
+
+<div class="grid grid-cols-2 gap-6 items-start">
+  <div class="flex flex-col gap-6">
+    <div class="bg-white rounded-2xl p-6 shadow-sm">
+      <h2 class="font-display text-2xl mb-4">Профіль</h2>
+      <form method="post" class="flex flex-col gap-3">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="profile">
+        <label class="text-muted text-sm">Ім'я</label>
+        <input name="first_name" value="{{ request.user.first_name }}"
+               class="border border-brand-200 rounded-xl px-4 py-2">
+        <label class="text-muted text-sm">Email</label>
+        <input value="{{ request.user.email|default:'name@example.com' }}" disabled
+               class="border border-brand-200 rounded-xl px-4 py-2 bg-brand-50 text-muted">
+        <button class="bg-brand-500 text-white rounded-xl py-2 hover:bg-brand-900">Зберегти</button>
+      </form>
+    </div>
+
+    <div class="bg-white rounded-2xl p-6 shadow-sm">
+      <h2 class="font-display text-2xl mb-4">Тема</h2>
+      <form method="post" class="flex flex-col gap-3" id="theme-form">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="theme">
+        <div class="grid grid-cols-2 gap-2 rounded-xl bg-brand-50 p-1">
+          <label data-theme-option="light"
+                 class="theme-option text-center py-2 rounded-lg cursor-pointer {% if profile.theme == 'light' %}bg-brand-500 text-white{% endif %}">
+            <input type="radio" name="theme" value="light" class="sr-only" {% if profile.theme == 'light' %}checked{% endif %}>Світла
+          </label>
+          <label data-theme-option="dark"
+                 class="theme-option text-center py-2 rounded-lg cursor-pointer {% if profile.theme == 'dark' %}bg-brand-500 text-white{% endif %}">
+            <input type="radio" name="theme" value="dark" class="sr-only" {% if profile.theme == 'dark' %}checked{% endif %}>Темна
+          </label>
+        </div>
+        <button class="bg-brand-500 text-white rounded-xl py-2 hover:bg-brand-900">Зберегти тему</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-2xl p-6 shadow-sm">
+    <h2 class="font-display text-2xl mb-4">Зміна пароля</h2>
+    <form method="post" class="flex flex-col gap-3">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="password">
+      {% for field in pwd_form %}
+        {% include "includes/password_field.html" %}
+      {% endfor %}
+      <button class="bg-brand-500 text-white rounded-xl py-2 hover:bg-brand-900">Змінити пароль</button>
+    </form>
+  </div>
+
+  <div class="col-span-1">
+    <form method="post" action="{% url 'logout' %}">
+      {% csrf_token %}
+      <button class="w-full bg-danger text-white font-semibold rounded-xl py-3 hover:opacity-90">Вийти з акаунта</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const options = document.querySelectorAll('.theme-option');
+    options.forEach(label => {
+      label.addEventListener('click', () => {
+        options.forEach(l => {
+          l.classList.remove('bg-brand-500', 'text-white');
+          l.querySelector('input').checked = false;
+        });
+        label.classList.add('bg-brand-500', 'text-white');
+        label.querySelector('input').checked = true;
+      });
+    });
+  });
+</script>
+{% endblock %}

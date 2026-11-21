@@ -1,0 +1,30 @@
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('', views.home, name='home'),
+    path('dashboard/', views.dashboard, name='dashboard'),
+    path('transactions/', views.transactions, name='transactions'),
+    path('transactions/clear/', views.transactions_clear, name='transactions_clear'),
+    path('limits/', views.limits, name='limits'),
+    path('limits/clear/', views.limits_clear, name='limits_clear'),
+    path('goals/', views.goals, name='goals'),
+    path('goals/clear/', views.goals_clear, name='goals_clear'),
+    path('goals/<int:pk>/deposit/', views.goal_deposit, name='goal_deposit'),
+    path('goals/<int:pk>/delete/', views.goal_delete, name='goal_delete'),
+    path('notifications/', views.notifications, name='notifications'),
+    path('forecast/', views.forecast, name='forecast'),
+    path('export/', views.export_view, name='export'),
+    path('signup/', views.signup, name='signup'),
+    path('friends/', views.friends, name='friends'),
+    path('shared/', views.shared, name='shared'),
+    path('shared/group/create/', views.group_create, name='group_create'),
+    path('shared/group/<int:pk>/delete/', views.group_delete, name='group_delete'),
+    path('shared/group/<int:pk>/expense/', views.expense_create, name='expense_create'),
+    path('shared/group/<int:pk>/message/', views.message_create, name='message_create'),
+    path('shared/group/<int:pk>/settle/', views.settlement_done, name='settlement_done'),
+    path('shared/group/<int:pk>/add-member/', views.group_add_member, name='group_add_member'),
+    path('shared/group/<int:pk>/remove-member/<int:user_pk>/', views.group_remove_member, name='group_remove_member'),
+    path('settings/', views.settings_view, name='settings'),
+    path('notifications/clear/', views.notifications_clear, name='notifications_clear'),
+]
