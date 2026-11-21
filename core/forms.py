@@ -1,5 +1,3 @@
-from multiprocessing import context
-
 from django import forms
 from django.contrib.auth.forms import (
     AuthenticationForm,
@@ -9,6 +7,8 @@ from django.contrib.auth.forms import (
     UserCreationForm,
 )
 from django.contrib.auth.models import User
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 
 from .models import Transaction, Limit, Goal, Group, SharedExpense
 
@@ -239,19 +239,17 @@ class PasswordResetUAForm(PasswordResetForm):
         widget=forms.EmailInput(attrs={'class': INPUT_CLASS, 'autofocus': True}),
     )
 
-    error_messages = {
-        'required': 'Введи email',
-        'invalid': 'Введи коректний email, наприклад name@gmail.com',
-    }
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        if not User.objects.filter(email__iexact=email, is_active=True).exists():
+            raise forms.ValidationError('Такої адреси не знайдено. Перевір написання або зареєструйся.')
+        return email
 
     def send_mail(self, subject_template_name, email_template_name,
                   context, from_email, to_email, html_email_template_name=None):
         from django.conf import settings
         link = f"{settings.SITE_URL}/accounts/reset/{context['uid']}/{context['token']}/"
         self.demo_link = link
-
-from django.contrib.auth.password_validation import validate_password
-from django.core.exceptions import ValidationError
 
 
 class SetPasswordUAForm(SetPasswordForm):
