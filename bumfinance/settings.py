@@ -127,17 +127,18 @@ LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'login'
 
 
-# Пошта (Gmail, SMTP)
+# Пошта (SMTP). На Render Gmail заблокований, тому використовуємо Brevo.
+# Значення задаються змінними середовища на Render.
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 465
-EMAIL_USE_SSL = True
-EMAIL_USE_TLS = False
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '465'))
+EMAIL_USE_SSL = EMAIL_PORT == 465
+EMAIL_USE_TLS = EMAIL_PORT == 587
 EMAIL_TIMEOUT = 30
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'mykyta.buman@hneu.net')
 EMAIL_HOST_PASSWORD = os.environ.get('BUMFINANCE_EMAIL_PASSWORD', '')
-DEFAULT_FROM_EMAIL = f'BumFinance <{EMAIL_HOST_USER}>'
-SERVER_EMAIL = EMAIL_HOST_USER
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', f'BumFinance <{EMAIL_HOST_USER}>')
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
 
 
 # Адреса сайту для посилань у листах
