@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -20,12 +21,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-eo*llh-6nlzmtq$en$)s*#+ij&*l*0iv$m2s!-zrj0&$c2z^=9'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-only-key-change-me')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [h.strip() for h in os.environ.get('ALLOWED_HOSTS', '').split(',') if h.strip()] + ['127.0.0.1', 'localhost']
 
 
 # Application definition
@@ -119,24 +120,25 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'login'
-DEFAULT_FROM_EMAIL = 'BumFinance <noreply@bumfinance.local>'
 
-import os
 
-# Відправка листів через Gmail (SMTP)
+# Пошта (Gmail, SMTP)
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
+EMAIL_PORT = 465
+EMAIL_USE_SSL = True
+EMAIL_USE_TLS = False
+EMAIL_TIMEOUT = 30
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'mykyta.buman@hneu.net')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'epay afmi otek afgl')
-DEFAULT_FROM_EMAIL = 'BumFinance <noreply@bumfinance.local>'
-SITE_NAME = 'АбітГід'
-SITE_URL = 'http://127.0.0.1:8000'
-DOMAIN = os.environ.get('DOMAIN', 'localhost:8000')
+EMAIL_HOST_PASSWORD = os.environ.get('BUMFINANCE_EMAIL_PASSWORD', '')
+DEFAULT_FROM_EMAIL = f'BumFinance <{EMAIL_HOST_USER}>'
+SERVER_EMAIL = EMAIL_HOST_USER
 
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Адреса сайту для посилань у листах
+SITE_URL = os.environ.get('SITE_URL', 'http://127.0.0.1:8000')
