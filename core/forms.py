@@ -1,3 +1,5 @@
+from multiprocessing import context
+
 from django import forms
 from django.contrib.auth.forms import (
     AuthenticationForm,
@@ -245,28 +247,8 @@ class PasswordResetUAForm(PasswordResetForm):
     def send_mail(self, subject_template_name, email_template_name,
                   context, from_email, to_email, html_email_template_name=None):
         from django.conf import settings
-        from django.core.mail import EmailMultiAlternatives
-
         link = f"{settings.SITE_URL}/accounts/reset/{context['uid']}/{context['token']}/"
-        name = context['user'].first_name or context['user'].username
-        subject = 'Відновлення пароля BumFinance'
-        text_body = (
-            f"Вітаємо, {name}!\n\n"
-            "Щоб змінити пароль у BumFinance, перейди за посиланням:\n\n"
-            f"{link}\n\n"
-            "Якщо ти не запитував зміну пароля, просто проігноруй цей лист.\n\n"
-            "BumFinance"
-        )
-        html_body = (
-            f"<p>Вітаємо, {name}!</p>"
-            "<p>Щоб змінити пароль у BumFinance, перейди за посиланням:</p>"
-            f'<p><a href="{link}">{link}</a></p>'
-            "<p>Якщо ти не запитував зміну пароля, проігноруй цей лист.</p>"
-        )
-
-        msg = EmailMultiAlternatives(subject, text_body, from_email, [to_email])
-        msg.attach_alternative(html_body, 'text/html')
-        msg.send()
+        self.demo_link = link
 
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError

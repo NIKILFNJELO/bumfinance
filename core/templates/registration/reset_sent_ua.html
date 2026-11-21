@@ -1,6 +1,9 @@
 {% extends "auth_base.html" %}
 {% block auth_content %}
 <h1 class="font-display text-4xl mb-4">Перевір пошту</h1>
-<p class="text-muted">Якщо акаунт з таким email існує, ми надіслали на нього посилання. Перевір також папку «Спам».</p>
+<p class="text-muted mb-4">Демо-режим: лист на пошту не відправлено. Перейди за посиланням нижче, щоб змінити пароль.</p>
+{% if request.session.demo_reset_link %}
+  <p class="break-all"><a href="{{ request.session.demo_reset_link }}" class="text-brand-500">{{ request.session.demo_reset_link }}</a></p>
+{% endif %}
 <p class="text-center mt-6"><a href="{% url 'login' %}" class="text-brand-500">Повернутися до входу</a></p>
 {% endblock %}

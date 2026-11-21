@@ -860,3 +860,13 @@ def goals_clear(request):
         user_goals(request).delete()
         messages.success(request, 'Цілі очищено.')
     return redirect('goals')
+
+from django.contrib.auth.views import PasswordResetView
+
+
+class DemoPasswordResetView(PasswordResetView):
+    def form_valid(self, form):
+        self.request.session['demo_reset_link'] = None
+        response = super().form_valid(form)
+        self.request.session['demo_reset_link'] = form.demo_link
+        return response
