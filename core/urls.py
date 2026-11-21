@@ -27,4 +27,5 @@ urlpatterns = [
     path('shared/group/<int:pk>/remove-member/<int:user_pk>/', views.group_remove_member, name='group_remove_member'),
     path('settings/', views.settings_view, name='settings'),
     path('notifications/clear/', views.notifications_clear, name='notifications_clear'),
+    path('shared/group/<int:pk>/leave/', views.group_leave, name='group_leave'),
 ]

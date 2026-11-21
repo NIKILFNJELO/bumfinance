@@ -45,7 +45,7 @@ from .models import (
     Transaction, Limit, Goal, Group, Membership, SharedExpense,
     Share, Settlement, FriendRequest, GroupMessage, GroupRead, Notification,
 )
-from .services import check_notifications, group_balances, min_settlements
+from .services import check_notifications, group_balances, min_settlements, notify_group_event
 
 def user_balance(user):
     income = Transaction.objects.filter(user=user, type='income').aggregate(s=Sum('amount'))['s'] or Decimal('0')
@@ -895,3 +895,31 @@ def min_settlements(balances):
         if creditors[j][1] == 0:
             j += 1
     return result
+
+
+def group_leave(request, pk):
+    group = get_object_or_404(Group, pk=pk, memberships__user=request.user)
+    if request.method != 'POST':
+        return redirect('shared')
+
+    if group.owner == request.user:
+        messages.error(request, 'Адмін не може покинути групу. Видали групу або передай адміністрування.')
+        return redirect(f"{reverse('shared')}?group={group.pk}")
+
+    my_balance = next(
+        (b['amount'] for b in group_balances(group) if b['user_id'] == request.user.pk),
+        Decimal('0'),
+    )
+    if my_balance < 0:
+        messages.error(request, f'Є непогашений борг {-my_balance} ₴. Спочатку сплати його.')
+        return redirect(f"{reverse('shared')}?group={group.pk}")
+
+    Membership.objects.filter(group=group, user=request.user).delete()
+    notify_group_event(
+        [m.user for m in group.memberships.select_related('user')],
+        f'{request.user.first_name or request.user.username} вийшов з групи «{group.name}».',
+        title='Учасник вийшов з групи',
+        kind='group_leave',
+    )
+    messages.success(request, f'Ти вийшов з групи «{group.name}».')
+    return redirect('shared')
